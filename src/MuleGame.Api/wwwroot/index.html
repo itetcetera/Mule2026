@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M.U.L.E. - Multiple Use Labor Element</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Title Screen -->
+        <div id="title-screen" class="screen active">
+            <div class="title-logo">
+                <pre class="ascii-art">
+███╗   ███╗ ██╗   ██╗ ██╗     ███████╗
+████╗ ████║ ██║   ██║ ██║     ██╔════╝
+██╔████╔██║ ██║   ██║ ██║     █████╗
+██║╚██╔╝██║ ██║   ██║ ██║     ██╔══╝
+██║ ╚═╝ ██║ ╚██████╔╝ ███████╗███████╗
+╚═╝     ╚═╝  ╚═════╝  ╚══════╝╚══════╝
+                </pre>
+                <p class="subtitle">MULTIPLE USE LABOR ELEMENT</p>
+                <p class="credit">© 1983 OZARK SOFTSCAPE / ELECTRONIC ARTS</p>
+                <p class="credit">WEB VERSION 2024</p>
+            </div>
+            <div class="menu">
+                <button id="btn-new-game" class="menu-button">NEW GAME</button>
+                <button id="btn-how-to-play" class="menu-button">HOW TO PLAY</button>
+            </div>
+        </div>
+
+        <!-- Game Setup Screen -->
+        <div id="setup-screen" class="screen">
+            <h1>GAME SETUP</h1>
+            <div class="setup-section">
+                <h2>DIFFICULTY</h2>
+                <div class="difficulty-buttons">
+                    <button class="difficulty-btn active" data-difficulty="0">BEGINNER</button>
+                    <button class="difficulty-btn" data-difficulty="1">STANDARD</button>
+                    <button class="difficulty-btn" data-difficulty="2">TOURNAMENT</button>
+                </div>
+            </div>
+            <div class="setup-section">
+                <h2>PLAYERS</h2>
+                <div id="player-setup">
+                    <!-- Player setup slots will be generated here -->
+                </div>
+            </div>
+            <div class="setup-buttons">
+                <button id="btn-back-to-title" class="menu-button">BACK</button>
+                <button id="btn-start-game" class="menu-button">START GAME</button>
+            </div>
+        </div>
+
+        <!-- Main Game Screen -->
+        <div id="game-screen" class="screen">
+            <!-- Header with round/phase info -->
+            <div id="game-header">
+                <div class="header-left">
+                    <span id="round-display">ROUND 1/12</span>
+                    <span id="phase-display">LAND GRANT</span>
+                </div>
+                <div class="header-right">
+                    <span id="colony-score">COLONY: $0</span>
+                </div>
+            </div>
+
+            <!-- Main game map -->
+            <div id="game-map">
+                <!-- Map tiles will be generated here -->
+            </div>
+
+            <!-- Player panels -->
+            <div id="player-panels">
+                <!-- Player info panels will be generated here -->
+            </div>
+
+            <!-- Action panel -->
+            <div id="action-panel">
+                <div id="message-area">Welcome to Planet Irata!</div>
+                <div id="action-buttons">
+                    <!-- Context-sensitive buttons -->
+                </div>
+            </div>
+
+            <!-- Store panel (hidden by default) -->
+            <div id="store-panel" class="popup hidden">
+                <h2>COLONY STORE</h2>
+                <div class="store-inventory">
+                    <div class="store-item">
+                        <span>M.U.L.E.s:</span>
+                        <span id="store-mules">14</span>
+                        <span id="mule-price">$100</span>
+                        <button class="store-btn" data-action="buy-mule">BUY</button>
+                    </div>
+                    <div class="outfit-options">
+                        <button class="outfit-btn" data-type="1">FOOD $25</button>
+                        <button class="outfit-btn" data-type="2">ENERGY $50</button>
+                        <button class="outfit-btn" data-type="3">SMITHORE $75</button>
+                        <button class="outfit-btn hidden" data-type="4">CRYSTITE $100</button>
+                    </div>
+                </div>
+                <button id="close-store" class="menu-button">CLOSE</button>
+            </div>
+
+            <!-- Auction panel -->
+            <div id="auction-panel" class="popup hidden">
+                <h2 id="auction-title">FOOD AUCTION</h2>
+                <div class="auction-display">
+                    <div class="auction-scale">
+                        <div id="auction-sellers" class="auction-side sellers">
+                            <!-- Seller positions -->
+                        </div>
+                        <div id="auction-price-bar">
+                            <div id="store-sell-line"></div>
+                            <div id="store-buy-line"></div>
+                        </div>
+                        <div id="auction-buyers" class="auction-side buyers">
+                            <!-- Buyer positions -->
+                        </div>
+                    </div>
+                </div>
+                <div class="auction-controls">
+                    <button id="auction-up" class="auction-btn">▲ RAISE</button>
+                    <button id="auction-down" class="auction-btn">▼ LOWER</button>
+                    <button id="auction-toggle" class="auction-btn">BUY/SELL</button>
+                </div>
+                <div class="auction-info">
+                    <span>STORE: Buy <span id="store-buy-price">$0</span> / Sell <span id="store-sell-price">$0</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event popup -->
+        <div id="event-popup" class="popup hidden">
+            <div class="event-content">
+                <h2 id="event-title">EVENT!</h2>
+                <p id="event-message"></p>
+                <button id="event-ok" class="menu-button">OK</button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameover-screen" class="screen">
+            <h1 id="gameover-title">GAME OVER</h1>
+            <div id="gameover-result"></div>
+            <div id="final-scores"></div>
+            <button id="btn-play-again" class="menu-button">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>
