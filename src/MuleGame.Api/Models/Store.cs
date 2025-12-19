@@ -33,9 +33,12 @@ public class Store
     public const int SmithoreMaxPrice = 260;
     public const int SmithoreBasePrice = 50;
 
-    public const int CrystiteMinPrice = 48;
-    public const int CrystiteMaxPrice = 148;
-    // Crystite price is random, not supply/demand based
+    // Crystite pricing (Atari 800 accurate - from disassembly $336A-$3375)
+    // Base: random[0, 99] + 50 = 50 to 149
+    // Auction range adds 35 × 4 = 140, so max can reach 289
+    public const int CrystiteMinPrice = 50;
+    public const int CrystiteMaxPrice = 289;
+    // Crystite price is random (off-world market), not supply/demand based
 
     // MULE pricing - always 2x current Smithore price
     public int MulePrice => SmithorePrice * 2;
@@ -89,8 +92,10 @@ public class Store
         // Smithore price: inversely proportional to total supply
         SmithorePrice = CalculatePrice(totalSmithore + SmithoreStock, SmithoreMinPrice, SmithoreMaxPrice, SmithoreBasePrice, 20);
 
-        // Crystite price: Random between min and max (off-world market)
-        CrystitePrice = rng.Next(CrystiteMinPrice, CrystiteMaxPrice + 1);
+        // Crystite price (Atari 800 accurate - from disassembly $336A-$3375)
+        // Base: random[0, 99] + 50 = 50 to 149 (off-world market)
+        // Auction dynamics can add up to 140 more based on player trading
+        CrystitePrice = rng.Next(100) + 50;  // [50, 149]
     }
 
     /// <summary>
