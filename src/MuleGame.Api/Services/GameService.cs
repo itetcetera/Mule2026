@@ -55,7 +55,7 @@ public class GameService : IGameService
                 Species = setup.Species,
                 Type = setup.Type,
                 ConnectionId = setup.ConnectionId,
-                Money = Player.GetStartingMoney(setup.Species),
+                Money = Player.GetStartingMoney(setup.Species, setup.Type),
                 Food = 4,   // Starting food
                 Energy = 2, // Starting energy
                 Smithore = 0,
@@ -692,11 +692,18 @@ public class GameService : IGameService
 
         var player = game.Players.First(p => p.Id == playerId);
 
-        // Calculate gambling winnings based on time remaining
-        // Max $250 in round 12 with full time, scales down
-        int maxWinnings = 50 + (game.CurrentRound * 17); // ~50 to ~250
-        int timeRatio = player.TimeRemaining * 100 / Player.GetBaseTurnTime(player.Species);
-        int winnings = maxWinnings * timeRatio / 100;
+        // Calculate gambling winnings (Atari 800 accurate - from disassembly $6A7E)
+        // Formula: random[0; timeLeft×2] + roundsGamblingBonus[round/4]
+        // Bonus table: [50, 100, 150, 200] for rounds [1-3], [4-7], [8-11], [12]
+        int[] gamblingBonus = { 50, 100, 150, 200 };
+        int bonusIndex = Math.Min(3, (game.CurrentRound - 1) / 4);
+        int bonus = gamblingBonus[bonusIndex];
+
+        // Random portion based on time remaining (timeLeft×2 max)
+        int randomMax = player.TimeRemaining * 2;
+        int randomPart = randomMax > 0 ? game.Rng.Next(randomMax + 1) : 0;
+
+        int winnings = randomPart + bonus;
 
         player.Money += winnings;
 

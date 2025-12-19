@@ -19,10 +19,11 @@ public class Store
     public int SmithorePrice { get; set; }
     public int CrystitePrice { get; set; }
 
-    // Store price ranges (Atari 800 accurate)
+    // Store price ranges (Atari 800 accurate - from disassembly)
+    // Price limits from $28AD: Food 30, Energy 25, Smithore 35
     public const int FoodMinPrice = 4;
     public const int FoodMaxPrice = 100;
-    public const int FoodBasePrice = 30;
+    public const int FoodBasePrice = 25;  // Initial price same as energy
 
     public const int EnergyMinPrice = 4;
     public const int EnergyMaxPrice = 100;

@@ -82,14 +82,22 @@ public class Player
     };
 
     /// <summary>
-    /// Get starting money based on species (Atari 800 accurate)
+    /// Get starting money based on species and player type (Atari 800 accurate - from disassembly)
+    /// Human: $258 = 600, Flapper: $640 = 1600, Others: $3E8 = 1000, CPU: $4B0 = 1200
     /// </summary>
-    public static int GetStartingMoney(Species species) => species switch
+    public static int GetStartingMoney(Species species, PlayerType playerType = PlayerType.Human)
     {
-        Species.Humanoid => 600,    // Expert species
-        Species.Flapper => 1600,    // Beginner species
-        _ => 1000                    // All others
-    };
+        // CPU players get $1200 regardless of species
+        if (playerType == PlayerType.Computer)
+            return 1200;
+
+        return species switch
+        {
+            Species.Humanoid => 600,    // Expert species - less money
+            Species.Flapper => 1600,    // Beginner species - more money
+            _ => 1000                    // All others - standard money
+        };
+    }
 
     /// <summary>
     /// Get turn time in seconds based on species (Atari 800 accurate)

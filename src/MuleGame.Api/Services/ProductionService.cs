@@ -13,16 +13,49 @@ public interface IProductionService
 
 /// <summary>
 /// Handles production calculations (Atari 800 accurate)
-/// Each MULE can produce 0-8 units based on:
-/// - Terrain quality (0-4 dots)
-/// - Random variation
-/// - Energy availability
-/// - Adjacency bonus
-/// - Group bonus (3+ same production)
-/// - Weather/event modifiers
+/// Based on reverse-engineered 6502 assembly from the original ROM.
+///
+/// Production formula per plot:
+/// 1. Base = expsPlotsCapacity[exp][plot] (terrain quality 0-4)
+/// 2. Eco1 = expsPlayersNb[exp][player] / 3 (learning curve bonus)
+/// 3. Eco2 = count of adjacent same-type plots (economies of scale)
+/// 4. Random = binomial distribution (12 samples, -6 to +6 range)
+/// 5. Clamp result to [0, 8]
+/// 6. Apply energy shortage (random MULEs get 0 production)
 /// </summary>
 public class ProductionService : IProductionService
 {
+    /// <summary>
+    /// Atari 800 binomial distribution (12 random samples)
+    /// Probability distribution:
+    /// -4: 0.013%, -3: 0.562%, -2: 6.248%, -1: 24.303%
+    ///  0: 37.748%, +1: 24.303%, +2: 6.248%, +3: 0.562%, +4: 0.013%
+    /// </summary>
+    private int CalculateBinomialVariation(Random rng, int level)
+    {
+        if (level == 0) // Beginner - no variation
+            return 0;
+
+        // Sum 12 random values (0-255 each), subtract 1530 to center
+        // Then scale by (level - 1) if level > 1, or by 0.5 if level == 1
+        int sum = 0;
+        for (int i = 0; i < 12; i++)
+        {
+            sum += rng.Next(256);
+        }
+
+        // Center around 0: sum ranges [0, 3060], subtract 1530 -> [-1530, 1530]
+        int centered = sum - 1530;
+
+        // Scale: divide by ~255 to get range roughly [-6, 6]
+        double scaled = centered / 255.0;
+
+        // Apply level multiplier
+        double multiplier = level == 1 ? 0.5 : (level - 1);
+
+        return (int)(scaled * multiplier);
+    }
+
     /// <summary>
     /// Calculate production for all plots
     /// </summary>
@@ -143,26 +176,27 @@ public class ProductionService : IProductionService
 
     /// <summary>
     /// Calculate base production for a tile (Atari 800 algorithm)
-    /// Quality 0-4 maps to average production 0-2, 1-3, 2-4, 3-5, 4-6
-    /// With random variation of +/- 2
+    /// From disassembly: calcPlotProdWithEcos at $4D7A
+    ///
+    /// Formula:
+    /// 1. base = expsPlotsCapacity[exp][plot] (terrain quality)
+    /// 2. eco1 = expsPlayersNb[exp][player] / 3 (learning curve)
+    /// 3. eco2 = adjacent same-type count (economies of scale)
+    /// 4. Apply binomial variation based on difficulty level
+    /// 5. Clamp to [0, 8]
     /// </summary>
     private int CalculateBaseProduction(GameState game, MapTile tile, ResourceType resource)
     {
         int quality = tile.GetQuality(resource);
 
-        // Standard mode has random variation
-        if (game.Difficulty != GameDifficulty.Beginner)
-        {
-            // Base is quality + 1, with +/- 2 random
-            int baseValue = quality + 1;
-            int variation = game.Rng.Next(-2, 3); // -2 to +2
-            return Math.Clamp(baseValue + variation, 0, 8);
-        }
-        else
-        {
-            // Beginner mode is more predictable
-            return quality + 2;
-        }
+        // Get difficulty level (0=Beginner, 1=Standard, 2=Tournament)
+        int level = (int)game.Difficulty;
+
+        // Apply binomial variation (Atari 800 accurate)
+        int variation = CalculateBinomialVariation(game.Rng, level);
+
+        // Base production + variation, clamped to [0, 8]
+        return Math.Clamp(quality + variation, 0, 8);
     }
 
     /// <summary>
