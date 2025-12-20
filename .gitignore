@@ -70,3 +70,10 @@ appsettings.Development.json
 
 # Hot Reload
 *.hotreload
+
+# Godot
+.godot/
+*.import
+export_presets.cfg
+.mono/
+*.translation

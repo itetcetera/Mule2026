@@ -1,0 +1,171 @@
+[gd_scene load_steps=2 format=3 uid="uid://game_map"]
+
+[ext_resource type="Script" path="res://scripts/game_map.gd" id="1_map"]
+
+[node name="GameMap" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_map")
+
+[node name="MapContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 50.0
+offset_bottom = -100.0
+
+[node name="TileGrid" type="GridContainer" parent="MapContainer"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -450.0
+offset_top = -225.0
+offset_right = 450.0
+offset_bottom = 225.0
+grow_horizontal = 2
+grow_vertical = 2
+columns = 9
+
+[node name="Cursor" type="ColorRect" parent="MapContainer"]
+visible = false
+z_index = 10
+custom_minimum_size = Vector2(100, 90)
+offset_right = 100.0
+offset_bottom = 90.0
+color = Color(1, 1, 0, 0.5)
+
+[node name="PlayersContainer" type="Control" parent="MapContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="PlayerInfoPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -100.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PlayerInfoPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 5.0
+offset_right = -10.0
+offset_bottom = -5.0
+
+[node name="Player1" type="VBoxContainer" parent="PlayerInfoPanel/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Name" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player1"]
+layout_mode = 2
+text = "Player 1"
+horizontal_alignment = 1
+
+[node name="Money" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player1"]
+layout_mode = 2
+text = "$1000"
+horizontal_alignment = 1
+
+[node name="Resources" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player1"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "F:4 E:2 S:0 C:0"
+horizontal_alignment = 1
+
+[node name="Player2" type="VBoxContainer" parent="PlayerInfoPanel/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Name" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player2"]
+layout_mode = 2
+text = "Player 2"
+horizontal_alignment = 1
+
+[node name="Money" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player2"]
+layout_mode = 2
+text = "$1000"
+horizontal_alignment = 1
+
+[node name="Resources" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "F:4 E:2 S:0 C:0"
+horizontal_alignment = 1
+
+[node name="Player3" type="VBoxContainer" parent="PlayerInfoPanel/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Name" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player3"]
+layout_mode = 2
+text = "Player 3"
+horizontal_alignment = 1
+
+[node name="Money" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player3"]
+layout_mode = 2
+text = "$1000"
+horizontal_alignment = 1
+
+[node name="Resources" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player3"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "F:4 E:2 S:0 C:0"
+horizontal_alignment = 1
+
+[node name="Player4" type="VBoxContainer" parent="PlayerInfoPanel/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Name" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player4"]
+layout_mode = 2
+text = "Player 4"
+horizontal_alignment = 1
+
+[node name="Money" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player4"]
+layout_mode = 2
+text = "$1000"
+horizontal_alignment = 1
+
+[node name="Resources" type="Label" parent="PlayerInfoPanel/HBoxContainer/Player4"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "F:4 E:2 S:0 C:0"
+horizontal_alignment = 1
+
+[node name="PhaseInstructions" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 50.0
+offset_bottom = 80.0
+grow_horizontal = 2
+text = "Select a plot of land"
+horizontal_alignment = 1
+
+[node name="Timer" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -100.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 40.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 24
+text = "45"
+horizontal_alignment = 2

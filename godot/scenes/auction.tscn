@@ -1,0 +1,194 @@
+[gd_scene load_steps=2 format=3 uid="uid://auction_scene"]
+
+[ext_resource type="Script" path="res://scripts/auction.gd" id="1_auction"]
+
+[node name="Auction" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_auction")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.15, 0.15, 0.2, 1)
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 20.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 32
+text = "SMITHORE AUCTION"
+horizontal_alignment = 1
+
+[node name="PriceBar" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -200.0
+offset_right = 300.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BarBackground" type="ColorRect" parent="PriceBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.2, 0.2, 0.25, 1)
+
+[node name="StorePrice" type="ColorRect" parent="PriceBar"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 180.0
+offset_bottom = 220.0
+grow_horizontal = 2
+color = Color(0.4, 0.4, 0.4, 1)
+
+[node name="StorePriceLabel" type="Label" parent="PriceBar/StorePrice"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "STORE: $100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PriceLabels" type="VBoxContainer" parent="PriceBar"]
+layout_mode = 1
+offset_left = -60.0
+offset_right = -10.0
+offset_bottom = 400.0
+
+[node name="MaxPrice" type="Label" parent="PriceBar/PriceLabels"]
+layout_mode = 2
+text = "$200"
+horizontal_alignment = 2
+
+[node name="MidPrice" type="Label" parent="PriceBar/PriceLabels"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "$100"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="MinPrice" type="Label" parent="PriceBar/PriceLabels"]
+layout_mode = 2
+text = "$0"
+horizontal_alignment = 2
+
+[node name="BuyersArea" type="Control" parent="PriceBar"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -100.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Label" type="Label" parent="PriceBar/BuyersArea"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 20.0
+grow_horizontal = 2
+text = "BUYERS"
+horizontal_alignment = 1
+
+[node name="SellersArea" type="Control" parent="PriceBar"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 100.0
+grow_horizontal = 2
+
+[node name="Label" type="Label" parent="PriceBar/SellersArea"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "SELLERS"
+horizontal_alignment = 1
+
+[node name="PlayerPositions" type="Control" parent="PriceBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Instructions" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -80.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "UP/DOWN to move price, SPACE to buy from store, ESC to pass"
+horizontal_alignment = 1
+
+[node name="Timer" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -100.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 60.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 32
+text = "60"
+horizontal_alignment = 2
+
+[node name="ResourceInfo" type="Panel" parent="."]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 80.0
+offset_right = 250.0
+offset_bottom = 200.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ResourceInfo"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="StoreStock" type="Label" parent="ResourceInfo/VBoxContainer"]
+layout_mode = 2
+text = "Store Stock: 8"
+
+[node name="StorePrice" type="Label" parent="ResourceInfo/VBoxContainer"]
+layout_mode = 2
+text = "Store Price: $100"
+
+[node name="YourStock" type="Label" parent="ResourceInfo/VBoxContainer"]
+layout_mode = 2
+text = "Your Stock: 0"
+
+[node name="YourMoney" type="Label" parent="ResourceInfo/VBoxContainer"]
+layout_mode = 2
+text = "Your Money: $1000"
