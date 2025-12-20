@@ -40,6 +40,9 @@ public interface IGameService
     GameState AcceptTrade(string gameId, int buyerId, int sellerId);
     GameState TradeWithStore(string gameId, int playerId, ResourceType resource, int quantity, bool isBuying);
     GameState NextAuctionResource(string gameId);
+
+    // Event management
+    GameState AcknowledgeEvent(string gameId);
 }
 
 /// <summary>

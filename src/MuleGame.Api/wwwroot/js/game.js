@@ -477,6 +477,17 @@ function showEventPopup(message) {
 
 function closeEventPopup() {
     document.getElementById('event-popup').classList.add('hidden');
+
+    // Tell server we've acknowledged the event so it gets removed
+    if (gameState && gameState.gameId) {
+        fetch(`${API_BASE}/${gameState.gameId}/event/acknowledge`, { method: 'POST' })
+            .then(resp => resp.json())
+            .then(state => {
+                gameState = state;
+                renderGame();
+            })
+            .catch(err => console.error('Failed to acknowledge event', err));
+    }
 }
 
 function checkForGameOver() {
@@ -549,11 +560,15 @@ function showMessage(text) {
 
 // Game Actions
 async function selectLand() {
-    await apiPost('/land-grant/select', { playerId: currentPlayerId });
+    // Get the player who should be acting (from landGrantState)
+    const playerId = gameState.landGrantState?.selectionOrder[gameState.landGrantState?.currentSelectorIndex] ?? currentPlayerId;
+    await apiPost('/land-grant/select', { playerId: playerId });
 }
 
 async function passLandGrant() {
-    await apiPost('/land-grant/pass', { playerId: currentPlayerId });
+    // Get the player who should be acting (from landGrantState)
+    const playerId = gameState.landGrantState?.selectionOrder[gameState.landGrantState?.currentSelectorIndex] ?? currentPlayerId;
+    await apiPost('/land-grant/pass', { playerId: playerId });
 }
 
 async function advancePhase() {
@@ -636,8 +651,9 @@ async function handleTileClick(x, y) {
             const dx = x - state.cursorX;
             const dy = y - state.cursorY;
             if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
+                const playerId = state.selectionOrder[state.currentSelectorIndex] ?? currentPlayerId;
                 await apiPost('/land-grant/move', {
-                    playerId: currentPlayerId,
+                    playerId: playerId,
                     dx: dx,
                     dy: dy
                 });
@@ -664,9 +680,6 @@ async function handleTileClick(x, y) {
 function handleKeyDown(e) {
     if (!gameState) return;
 
-    const currentPlayer = gameState.players[currentPlayerId];
-    if (!currentPlayer || currentPlayer.type !== 0) return;
-
     let dx = 0, dy = 0;
 
     switch (e.key) {
@@ -676,7 +689,10 @@ function handleKeyDown(e) {
         case 'ArrowRight': case 'd': case 'D': dx = 1; break;
         case 'Enter': case ' ':
             if (gameState.phase === 1) selectLand();
-            else if (gameState.phase === 3 && currentPlayer.hasMule) installMule();
+            else if (gameState.phase === 3) {
+                const currentPlayer = gameState.players[currentPlayerId];
+                if (currentPlayer && currentPlayer.hasMule) installMule();
+            }
             return;
         case 'Escape':
             document.getElementById('store-panel').classList.add('hidden');
@@ -690,12 +706,16 @@ function handleKeyDown(e) {
         e.preventDefault();
 
         if (gameState.phase === 1) {
-            apiPost('/land-grant/move', { playerId: currentPlayerId, dx, dy });
+            const playerId = gameState.landGrantState?.selectionOrder[gameState.landGrantState?.currentSelectorIndex] ?? currentPlayerId;
+            apiPost('/land-grant/move', { playerId, dx, dy });
         } else if (gameState.phase === 3) {
-            const newX = currentPlayer.positionX + dx;
-            const newY = currentPlayer.positionY + dy;
-            if (newX >= 0 && newX < 9 && newY >= 0 && newY < 5) {
-                apiPost('/development/move', { playerId: currentPlayerId, x: newX, y: newY });
+            const currentPlayer = gameState.players[currentPlayerId];
+            if (currentPlayer) {
+                const newX = currentPlayer.positionX + dx;
+                const newY = currentPlayer.positionY + dy;
+                if (newX >= 0 && newX < 9 && newY >= 0 && newY < 5) {
+                    apiPost('/development/move', { playerId: currentPlayerId, x: newX, y: newY });
+                }
             }
         }
     }

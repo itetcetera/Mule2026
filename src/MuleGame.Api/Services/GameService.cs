@@ -35,7 +35,8 @@ public class GameService : IGameService
         var game = new GameState
         {
             Difficulty = difficulty,
-            Phase = GamePhase.Setup
+            Phase = GamePhase.Setup,
+            CurrentRound = 0
         };
 
         // Initialize store
@@ -227,7 +228,7 @@ public class GameService : IGameService
                         terrain == TerrainType.Mountains3)
                     {
                         mountains.Add((x, y));
-                    }
+                      }
                 }
             }
 
@@ -291,46 +292,16 @@ public class GameService : IGameService
 
         game.ProductionState.IsComplete = true;
 
-        // Apply any pending events that affect production
-        foreach (var evt in game.PendingEvents.Where(e => !e.MuleLost))
-        {
-            ApplyEventEffects(game, evt);
-        }
-        game.EventHistory.AddRange(game.PendingEvents);
-        game.PendingEvents.Clear();
-
         _sessionManager.UpdateGame(game);
-
-        // Auto-advance to auction after showing production
-        StartResourceAuctionPhase(game);
-    }
-
-    private void ApplyEventEffects(GameState game, RandomEventResult evt)
-    {
-        if (evt.AffectedPlayerId.HasValue)
-        {
-            var player = game.Players.FirstOrDefault(p => p.Id == evt.AffectedPlayerId);
-            if (player != null)
-            {
-                player.Money += evt.MoneyChange;
-                player.Food += evt.FoodChange;
-                player.Energy += evt.EnergyChange;
-                player.Smithore += evt.SmithoreChange;
-                player.Crystite += evt.CrystiteChange;
-
-                // Ensure no negative resources
-                player.Money = Math.Max(0, player.Money);
-                player.Food = Math.Max(0, player.Food);
-                player.Energy = Math.Max(0, player.Energy);
-                player.Smithore = Math.Max(0, player.Smithore);
-                player.Crystite = Math.Max(0, player.Crystite);
-            }
-        }
     }
 
     private void StartResourceAuctionPhase(GameState game)
     {
         game.Phase = GamePhase.ResourceAuction;
+
+        // Move processed round-start events to history
+        game.EventHistory.AddRange(game.PendingEvents);
+        game.PendingEvents.Clear();
 
         // Update store prices
         var (food, energy, smithore, crystite) = game.GetTotalResources();
@@ -883,6 +854,34 @@ public class GameService : IGameService
         ResourceType.Crystite => player.Crystite,
         _ => 0
     };
+
+    #endregion
+
+    #region Event Management
+
+    /// <summary>
+    /// Acknowledge (consume) the next pending event for the game
+    /// Removes the first pending event and records it in history.
+    /// </summary>
+    public GameState AcknowledgeEvent(string gameId)
+    {
+        var game = GetGame(gameId);
+        if (game == null)
+            throw new InvalidOperationException("Game not found");
+
+        if (game.PendingEvents.Count == 0)
+        {
+            _sessionManager.UpdateGame(game);
+            return game;
+        }
+
+        var evt = game.PendingEvents[0];
+        game.EventHistory.Add(evt);
+        game.PendingEvents.RemoveAt(0);
+
+        _sessionManager.UpdateGame(game);
+        return game;
+    }
 
     #endregion
 }

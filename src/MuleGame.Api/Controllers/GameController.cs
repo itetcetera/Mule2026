@@ -368,6 +368,27 @@ public class GameController : ControllerBase
     }
 
     #endregion
+
+    #region Event Management
+
+    /// <summary>
+    /// Acknowledge (dismiss) the current pending event
+    /// </summary>
+    [HttpPost("{gameId}/event/acknowledge")]
+    public ActionResult<GameStateDto> AcknowledgeEvent(string gameId)
+    {
+        try
+        {
+            var game = _gameService.AcknowledgeEvent(gameId);
+            return Ok(GameStateDto.FromGameState(game));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    #endregion
 }
 
 #region Request/Response DTOs
