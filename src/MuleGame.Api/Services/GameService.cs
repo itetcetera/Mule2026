@@ -339,6 +339,29 @@ public class GameService : IGameService
         }
     }
 
+    private void ApplyEventEffects(GameState game, RandomEventResult evt)
+    {
+        if (evt.AffectedPlayerId.HasValue)
+        {
+            var player = game.Players.FirstOrDefault(p => p.Id == evt.AffectedPlayerId);
+            if (player != null)
+            {
+                player.Money += evt.MoneyChange;
+                player.Food += evt.FoodChange;
+                player.Energy += evt.EnergyChange;
+                player.Smithore += evt.SmithoreChange;
+                player.Crystite += evt.CrystiteChange;
+
+                // Ensure no negative resources
+                player.Money = Math.Max(0, player.Money);
+                player.Food = Math.Max(0, player.Food);
+                player.Energy = Math.Max(0, player.Energy);
+                player.Smithore = Math.Max(0, player.Smithore);
+                player.Crystite = Math.Max(0, player.Crystite);
+            }
+        }
+    }
+
     public GameState AdvancePhase(string gameId)
     {
         var game = GetGame(gameId);
