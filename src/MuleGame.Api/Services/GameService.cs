@@ -92,14 +92,7 @@ public class GameService : IGameService
     {
         game.CurrentRound++;
 
-        // Generate random event for this round
-        var randomEvent = _randomEventService.GenerateRoundEvent(game);
-        if (randomEvent != null)
-        {
-            game.PendingEvents.Add(randomEvent);
-        }
-
-        // Check for colony ship on round 12
+        // Check for colony ship on round 12 (happens at round start)
         if (game.CurrentRound == 12)
         {
             game.Store.Restock();
@@ -292,6 +285,14 @@ public class GameService : IGameService
 
         game.ProductionState.IsComplete = true;
 
+        // Generate random event AFTER production (Atari 800 accurate - $4800 roundEvent)
+        // Events are applied at start of auction phase
+        var randomEvent = _randomEventService.GenerateRoundEvent(game);
+        if (randomEvent != null)
+        {
+            game.PendingEvents.Add(randomEvent);
+        }
+
         _sessionManager.UpdateGame(game);
     }
 
@@ -299,7 +300,11 @@ public class GameService : IGameService
     {
         game.Phase = GamePhase.ResourceAuction;
 
-        // Move processed round-start events to history
+        // Apply random event BEFORE auctions (Atari 800 accurate - $4800)
+        foreach (var evt in game.PendingEvents.Where(e => !e.MuleLost))
+        {
+            ApplyEventEffects(game, evt);
+        }
         game.EventHistory.AddRange(game.PendingEvents);
         game.PendingEvents.Clear();
 
@@ -307,9 +312,10 @@ public class GameService : IGameService
         var (food, energy, smithore, crystite) = game.GetTotalResources();
         game.Store.UpdatePrices(food, energy, smithore, crystite, game.Rng);
 
+        // Atari 800 auction order: Smithore → Crystite → Food → Energy ($4817-$482F)
         game.ResourceAuctionState = new ResourceAuctionState
         {
-            CurrentResource = ResourceType.Food,
+            CurrentResource = ResourceType.Smithore,
             State = AuctionState.InProgress,
             TimeRemaining = 60
         };
@@ -823,18 +829,28 @@ public class GameService : IGameService
         state.BuyerPositions.Clear();
         state.SellerPositions.Clear();
 
-        // Move to next resource
+        // Atari 800 auction order: Smithore → Crystite → Food → Energy ($4817-$482F)
+        var previousResource = state.CurrentResource;
         state.CurrentResource = state.CurrentResource switch
         {
-            ResourceType.Food => ResourceType.Energy,
-            ResourceType.Energy => ResourceType.Smithore,
             ResourceType.Smithore when game.Difficulty == GameDifficulty.Tournament => ResourceType.Crystite,
-            _ => ResourceType.Food // End and loop or finish
+            ResourceType.Smithore => ResourceType.Food, // Skip crystite in non-tournament
+            ResourceType.Crystite => ResourceType.Food,
+            ResourceType.Food => ResourceType.Energy,
+            _ => ResourceType.Smithore // Signal end
         };
 
-        // If we've done all resources, end auction
-        if (state.CurrentResource == ResourceType.Food && state.ExecutedTrades.Count > 0)
+        // After Crystite auction, reset store crystite stock to 0 (Atari 800 - $4823-$4828)
+        if (previousResource == ResourceType.Crystite)
         {
+            game.Store.CrystiteStock = 0;
+        }
+
+        // If we've completed all auctions (cycled back to Smithore), end round
+        if (state.CurrentResource == ResourceType.Smithore)
+        {
+            // Build MULEs from smithore before ending round (Atari 800 - $483F buildAndCalcPriceMule)
+            BuildMulesFromSmithore(game);
             EndRound(game);
         }
         else
@@ -844,6 +860,21 @@ public class GameService : IGameService
 
         _sessionManager.UpdateGame(game);
         return game;
+    }
+
+    /// <summary>
+    /// Build MULEs from store smithore (Atari 800 - $339A buildAndCalcPriceMule)
+    /// Formula: nbMulesBuildable = goodsStoreNb[Smithore] / 2
+    /// </summary>
+    private void BuildMulesFromSmithore(GameState game)
+    {
+        // Each MULE requires 2 smithore to build
+        int mulesBuildable = game.Store.SmithoreStock / 2;
+        if (mulesBuildable > 0 && game.Difficulty != GameDifficulty.Beginner)
+        {
+            game.Store.SmithoreStock -= mulesBuildable * 2;
+            game.Store.MuleCount += mulesBuildable;
+        }
     }
 
     private int GetPlayerResource(Player player, ResourceType resource) => resource switch
